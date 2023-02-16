@@ -1,7 +1,7 @@
 {
   "editor.insertSpaces": true,
   "editor.detectIndentation": false,
-  "editor.tabSize": 2,
+  "editor.tabSize": 4,
   "typescript.preferences.quoteStyle": "single",
   "typescript.format.semicolons": "insert",
   "[typescriptreact]": {
