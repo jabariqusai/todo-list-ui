@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { List } from 'phosphor-react';
+import { useEffect, useState } from 'react';
 import { Todo } from '../types/todo';
 
 interface IState {
@@ -8,10 +9,14 @@ interface IState {
 const useList = () => {
   const [state, setState] = useState<IState>({ items: [] });
 
+  const retreve = ()=>  {fetch('http://localhost:3003/', {method:"GET"}).then(res=>res.json()as Promise<Todo.IItem[]>).then(items=>setState({items}));}
+
+useEffect(()=>{
+  retreve();
+},[])
   const add = (item: Todo.IItem) => setState(state => ({ ...state, items: state.items.concat(item) }));
 
   const remove = (id: string) => setState(state => ({ ...state, items: state.items.filter(item => item.id !== id) }));
-
   const update = (updatedItem: Todo.IItem) => {
     const updated = [...state.items];
 
