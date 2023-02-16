@@ -1,5 +1,4 @@
 import classes from './list.module.sass';
-
 import Form from './form/form.component';
 import { useList } from '../../hooks';
 import Item from './item/item.component';
