@@ -24,7 +24,7 @@ const Form = (props: IProps) => {
   };
 
   return (
-    <form className={classes.form} onSubmit={submit}>
+    <form className={classes.form} onSubmit={submit} method="POST">
       <input
         placeholder="Add a new item to the list"
         name="description"
