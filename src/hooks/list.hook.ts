@@ -6,17 +6,22 @@ interface IState {
 }
 
 const useList = () => {
+  const [loading, setLoading] = useState<boolean>(true);
   const [state, setState] = useState<IState>({ items: [] });
 
   const fetchList = () => {
+    console.log('fetching')
+    setLoading(true);
     fetch('http://localhost:3001/todo', { method: 'GET', })
       .then(res => res.json() as Promise<Todo.IItem[]>)
-      .then(list => setState({ items: list }));
+      .then(list => setState({ items: list }))
+      .then(() => setLoading(false))
+      .then(() => console.log('done!'))
   };
 
   useEffect(() => {
-    fetchList();
-  });
+    fetchList()
+  }, []);
 
   const add = (item: Todo.IItem) => {
     const options = {
@@ -70,9 +75,9 @@ const useList = () => {
   };
 
   const clearList = () => {
-    const confirmed = window.confirm('Are you sure you want to delete all items?');
+    const confirmed = window.confirm('Are you sure you want to delete ALL ITEMS?');
     if (!confirmed) return;
-    fetch(`http://localhost:3001/todo/`, { method: 'DELETE' })
+    fetch(`http://localhost:3001/todo`, { method: 'DELETE' })
       .then(res => {
         if (res.status === 204) {
           console.log(`successfully deleted`);
@@ -83,7 +88,7 @@ const useList = () => {
       });
   }
 
-  return { ...state, add, remove, update, clearList };
+  return { ...state, add, remove, update, clearList , loading};
 };
 
 export default useList;
