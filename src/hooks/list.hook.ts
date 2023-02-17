@@ -69,7 +69,21 @@ const useList = () => {
       });
   };
 
-  return { ...state, add, remove, update };
+  const clearList = () => {
+    const confirmed = window.confirm('Are you sure you want to delete all items?');
+    if (!confirmed) return;
+    fetch(`http://localhost:3001/todo/`, { method: 'DELETE' })
+      .then(res => {
+        if (res.status === 204) {
+          console.log(`successfully deleted`);
+          fetchList();
+        }
+        else
+          console.error(`Something went wrong\n${res.status}`);
+      });
+  }
+
+  return { ...state, add, remove, update, clearList };
 };
 
 export default useList;

@@ -9,7 +9,7 @@
     color: white
     outline: none
     padding: 10px 12px
-  & > button
+  & > button[type="submit"]
     display: flex
     align-items: center
     justify-content: center
@@ -23,4 +23,26 @@
     cursor: pointer
     transition: 0.15s ease-in-out
     &:hover, &:focus, &:active
-      background-color: #eee
+      outline: none
+      background-color: #d5d5d5
+  & > button[type="button"]
+    display: flex
+    align-items: center
+    justify-content: center
+    appearance: none
+    align-self: stretch
+    font-size: 18px
+    width: 37px
+    transition: 0.15s ease-in-out
+    background-color: #f16a6a
+    border-top-right-radius: 5px
+    border-bottom-right-radius: 5px
+    border: 2px solid #f16a6a
+    &:hover, &:focus, &:active
+      outline: none
+      background-color: #e35858
+      border-color: #e35858
+
+
+
+      
