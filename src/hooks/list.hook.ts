@@ -7,15 +7,20 @@ interface IState {
 
 const useList = () => {
   const [state, setState] = useState<IState>({ items: [] });
+  const [loading, setLoading] = useState(true);
 
-  const getList = () => {
+  const retrieveItems = () => {
+
     fetch('http://localhost:8081/todo', { method: 'GET' })
       .then(res => res.json() as Promise<Todo.IItem[]>)
       .then(items => setState({ items }));
+
   };
 
   useEffect(() => {
-    getList();
+    setLoading(true);
+    retrieveItems();
+    setLoading(false);
   }, []);
 
   const add = (item: Todo.IItem) => {
@@ -26,10 +31,11 @@ const useList = () => {
       },
       body: JSON.stringify({ ...item }),
     }).then(res => {
-      if (res.status == 201) {
-        getList();
+      if (res.status === 201) {
+        retrieveItems();
       }
-    });
+    }).catch(err => console.error(err));
+
   };
 
   const remove = (id: string) => {
@@ -39,23 +45,13 @@ const useList = () => {
         'Content-Type': 'application/json'
       },
     }).then(res => {
-      if (res.status == 200) {
-        getList();
+      if (res.status === 200) {
+        retrieveItems();
       }
     });
   };
 
   const update = (updatedItem: Todo.IItem) => {
-    const updated = [...state.items];
-
-    for (let i = 0; i < updated.length; ++i) {
-      if (updated[i].id === updatedItem.id) {
-        updated[i] = updatedItem;
-        break;
-      }
-    }
-
-    setState({ items: updated });
 
     fetch('http://localhost:8081/todo', {
       method: 'PUT',
@@ -64,13 +60,13 @@ const useList = () => {
       },
       body: JSON.stringify({ ...updatedItem }),
     }).then(res => {
-      if (res.status == 200) {
-        getList();
+      if (res.status === 200) {
+        retrieveItems();
       }
     });
   };
 
-  return { ...state, add, remove, update };
+  return { ...state, add, remove, update, loading };
 };
 
 export default useList;
