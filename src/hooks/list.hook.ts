@@ -39,19 +39,40 @@ const useList = () => {
       });
 
   };
-  const remove = (id: string) => setState(state => ({ ...state, items: state.items.filter(item => item.id !== id) }));
+  const remove = (id: string) => {
+
+    fetch(`http://localhost:3001/${id}`, { method: 'DELETE' })
+
+      .then(res => {
+        if (res.status === 204) {
+          console.debug('item deleted Successfully!');
+
+        } else {
+          console.debug('delete Failed', res.status);
+        }
+      });
+    // setState(state => ({ ...state, items: state.items.filter(item => item.id !== id) }));
+
+  };
 
   const update = (updatedItem: Todo.IItem) => {
-    const updated = [...state.items];
 
-    for (let i = 0; i < updated.length; ++i) {
-      if (updated[i].id === updatedItem.id) {
-        updated[i] = updatedItem;
-        break;
-      }
-    }
+    const options: RequestInit = {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(updatedItem)
+    };
 
-    setState({ items: updated });
+    fetch(`http://localhost:3001/${updatedItem.id}`, options)
+
+      .then(res => {
+        if (res.status === 205) {
+          console.debug('item updated Successfully!');
+          return retrieveItems();
+        } else {
+          console.debug('update Failed!', res.status);
+        }
+      });
   };
 
   return { ...state, add, remove, update };
