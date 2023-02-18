@@ -17,8 +17,6 @@ const useList = () => {
 
   useEffect(() => { 
     fetchList(); 
-    console.log(state);
-    
   }, [])
   
 
