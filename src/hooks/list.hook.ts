@@ -18,8 +18,28 @@ const useList = () => {
     fetchItems();
   }, []);
 
+// should integrate the post feature
+  const add = (item: Todo.IItem) => {
+    const options : RequestInit = {
+      method : 'POST' ,
+      headers :{
+        'Content-Type': 'application/json'
+      },
+      body : JSON.stringify(item)
+    }
 
-  const add = (item: Todo.IItem) => setState(state => ({ ...state, items: state.items.concat(item) }));
+    fetch('http://localhost:3001/' , options)
+    .then(res => {
+      if (res.status === 201){
+        console.log("successfully added items ");
+        return fetchItems();
+      }else{
+        console.log("failed added items", res.status);
+        
+      }
+    })
+
+  }
 
   const remove = (id: string) => setState(state => ({ ...state, items: state.items.filter(item => item.id !== id) }));
 
