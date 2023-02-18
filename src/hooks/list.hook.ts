@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Todo } from '../types/todo';
 
 interface IState {
@@ -7,6 +7,17 @@ interface IState {
 
 const useList = () => {
   const [state, setState] = useState<IState>({ items: [] });
+
+  const fetchItems = () => {
+    fetch('http://localhost:3001', { method: 'GET' })
+      .then(res => res.json() as Promise<Todo.IItem[]>)//never forget the [] due to it is an array
+      .then(items => setState({ items }));
+  };
+
+  useEffect(() => {
+    fetchItems();
+  }, []);
+
 
   const add = (item: Todo.IItem) => setState(state => ({ ...state, items: state.items.concat(item) }));
 
