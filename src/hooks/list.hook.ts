@@ -8,17 +8,24 @@ interface IState {
 const useList = () => {
     const [state, setState] = useState<IState>({ items: [] });
 
-    const retrieveList = () => fetch('http://localhost:3001/getTasks', { method: 'GET' })
-        .then(response => response.json() as Promise<Todo.IItem[]>);
-    // .then(res => setState( res ));
+    const retrieveList = () => {
+        fetch('http://localhost:3001/getTasks', { method: 'GET' })
+            .then(response => response.json()
+                .then((res: Todo.IItem[]) => {
+                    setState({ items: res });
+                }).catch(err => {
+                    console.log(err);
+                })
+            ).catch(err => {
+                console.log(err);
+            });
+    };
 
-    // i have to add useEffect 
     useEffect(() => {
         retrieveList();
     }, []);
-    const add = (item: Todo.IItem) => {
-        setState(state => ({ ...state, items: state.items.concat(item) }));
 
+    const add = (item: Todo.IItem) => {
         const options: RequestInit = {
             method: 'POST',
             body: JSON.stringify(item),
@@ -31,26 +38,40 @@ const useList = () => {
                     console.log('Item added successfully');
                 else
                     console.log('Error', res.status);
+                retrieveList();
             });
     };
 
     const remove = (id: string) => {
-        setState(state => ({ ...state, items: state.items.filter(item => item.id !== id) }));
+        console.log(id);
+        fetch(`http://localhost:3001/deleteTask/${id}`, { method: 'DELETE' })
+            .then(res => {
+                if (res.status === 200)
+                    console.log('Item deleted successfully');
+                else
+                    console.log('Error', res.status);
+                retrieveList();
+            });
+
     };
 
     const update = (updatedItem: Todo.IItem) => {
-        const updated = [...state.items];
 
-        for (let i = 0; i < updated.length; ++i) {
-            if (updated[i].id === updatedItem.id) {
-                updated[i] = updatedItem;
-                break;
-            }
-        }
+        const options: RequestInit = {
+            method: 'PUT',
+            body: JSON.stringify(updatedItem),
+            headers: { 'Content-Type': 'application/json' }
+        };
 
-        setState({ items: updated });
+        fetch(`http://localhost:3001/editTask/${updatedItem.id}`, options)
+            .then(res => {
+                if (res.status === 200)
+                    console.log('Item edited successfully');
+                else
+                    console.log('Error', res.status);
+                retrieveList();
+            });
     };
-
     return { ...state, add, remove, update };
 };
 
