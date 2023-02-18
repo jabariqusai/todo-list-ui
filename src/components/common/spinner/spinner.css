@@ -1,0 +1,28 @@
+.loader {
+    place-content: center;
+    width: 80px;
+    height: 80px;
+    background:
+        radial-gradient(farthest-side, #fff 94%, #0000) top/9px 9px no-repeat,
+        conic-gradient(#000 30%, #fff);
+    animation: spin 0.5s infinite linear;
+}
+
+.loader::after {
+    content: "";
+    width: 64px;
+    height: 64px;
+    background: #000;
+}
+
+@keyframes spin {
+    100% {
+        rotate: 1turn;
+    }
+}
+
+.loader,
+.loader::after {
+    border-radius: 50%;
+    display: grid;
+}

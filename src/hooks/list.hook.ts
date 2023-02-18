@@ -7,12 +7,14 @@ interface IState {
 
 const useList = () => {
     const [state, setState] = useState<IState>({ items: [] });
+    const [loading, setLoading] = useState<boolean>(true);
 
     const retrieveList = () => {
         fetch('http://localhost:3001/getTasks', { method: 'GET' })
             .then(response => response.json()
                 .then((res: Todo.IItem[]) => {
                     setState({ items: res });
+                    setLoading(false);
                 }).catch(err => {
                     console.log(err);
                 })
@@ -26,6 +28,7 @@ const useList = () => {
     }, []);
 
     const add = (item: Todo.IItem) => {
+        setLoading(true);
         const options: RequestInit = {
             method: 'POST',
             body: JSON.stringify(item),
@@ -43,7 +46,7 @@ const useList = () => {
     };
 
     const remove = (id: string) => {
-        console.log(id);
+        setLoading(true);
         fetch(`http://localhost:3001/deleteTask/${id}`, { method: 'DELETE' })
             .then(res => {
                 if (res.status === 200)
@@ -56,7 +59,7 @@ const useList = () => {
     };
 
     const update = (updatedItem: Todo.IItem) => {
-
+        setLoading(true);
         const options: RequestInit = {
             method: 'PUT',
             body: JSON.stringify(updatedItem),
@@ -72,7 +75,7 @@ const useList = () => {
                 retrieveList();
             });
     };
-    return { ...state, add, remove, update };
+    return { ...state, loading, add, remove, update };
 };
 
 export default useList;
