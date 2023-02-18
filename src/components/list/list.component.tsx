@@ -3,6 +3,7 @@ import classes from './list.module.sass';
 import Form from './form/form.component';
 import { useList } from '../../hooks';
 import Item from './item/item.component';
+import  Spinner  from '../spinner/spinner.component';
 
 interface IProps { }
 
@@ -12,7 +13,9 @@ const List = (props: IProps) => {
   return (
     <div className={classes.wrapper}>
       <Form onSubmit={list.add} />
-      <ul>
+      {
+        list.items.length > 0
+        ? <ul>
         {list.items.map(item => (
           <Item
             key={item.id}
@@ -22,6 +25,9 @@ const List = (props: IProps) => {
           />
         ))}
       </ul>
+      : <Spinner/>
+      }
+      
     </div>
   );
 };
