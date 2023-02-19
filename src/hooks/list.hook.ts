@@ -3,6 +3,7 @@ import { Todo } from '../types/todo';
 
 interface IState {
   items: Todo.IItem[];
+  loading: boolean;
 }
 
 interface IResponse {
@@ -11,16 +12,18 @@ interface IResponse {
 }
 
 const useList = () => {
-  const [state, setState] = useState<IState>({ items: [] });
+  const [state, setState] = useState<IState>({ items: [], loading: false });
 
   const retrieveItems = () => {
 
+    setState(oldState => ({ ...oldState, loading: true }));
+
     fetch('http://localhost:3001/', { method: 'GET' })
       .then(res => res.json() as Promise<IResponse>)
-      .then(jsonRes => {
-        setState({ items: jsonRes.results });
-      }
-      );
+      .then(jsonRes => { setState(oldState => ({ ...oldState, items: jsonRes.results })); })
+      .catch(err => { alert("something went wrong !"); })
+      .finally(() => setState(oldState => ({ ...oldState, loading: false })));
+
   };
 
   useEffect(() => {
@@ -40,7 +43,7 @@ const useList = () => {
       .then(res => {
         if (res.status === 201) {
           console.debug('item added Successfully!');
-          return retrieveItems();
+          retrieveItems();
         } else {
           console.debug('Failed', res.status);
         }
@@ -54,6 +57,7 @@ const useList = () => {
       .then(res => {
         if (res.status === 204) {
           console.debug('item deleted Successfully!');
+          return retrieveItems();
 
         } else {
           console.debug('delete Failed', res.status);
