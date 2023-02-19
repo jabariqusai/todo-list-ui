@@ -6,7 +6,7 @@ interface IState {
 const useList = () => {
   const [state, setState] = useState<IState>({ items: [] });
   const callList = () => {
-    fetch('http://localhost:3003/', { method: 'GET' })
+    fetch('http://localhost:3001/', { method: 'GET' })
       .then(res => res.json() as Promise<Todo.IItem[]>)
       .then(items => setState({ items }));
   };
@@ -19,7 +19,7 @@ const useList = () => {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(item)
     };
-    fetch(`http://localhost:3003/list`, options)
+    fetch(`http://localhost:3001`, options)
       .then(res => {
         if (res.status === 201) {
           console.debug('Successfully added item');
@@ -31,7 +31,7 @@ const useList = () => {
   };
   const remove = (id: string) => {
     console.log({id});
-    fetch(`http://localhost:3003/${id}`, { method: 'DELETE' })
+    fetch(`http://localhost:3001/${id}`, { method: 'DELETE' })
       .then(res => {
         if (res.status === 200) {
           console.debug('Successfully updated item');
@@ -47,7 +47,7 @@ const useList = () => {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(item)
     };
-    fetch(`http://localhost:3003/list/${item.id}`, options)
+    fetch(`http://localhost:3001/list/${item.id}`, options)
       .then(res => {
         if (res.status === 200) {
           console.debug('Successfully updated item');
