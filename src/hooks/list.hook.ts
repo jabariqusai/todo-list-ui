@@ -3,16 +3,25 @@ import { Todo } from '../types/todo';
 
 interface IState {
   items: Todo.IItem[];
+  loading : boolean ;
 }
 
 const useList = () => {
   
-  const [state, setState] = useState<IState>({ items: [] });
+  const [state, setState] = useState<IState>({ items: [] , loading : true });
   
   const fetchList = () => {
+    setState (oldState => ({...oldState , loading : true}))
     fetch('http://localhost:3002/todos' , {method : 'GET'})
       .then(res => res.json() as Promise<Todo.IItem[]>)
-      .then(items => setState({ items }));
+      .then(items => {
+        console.log('items fetched');
+        console.log(state.loading);
+        
+        setState(oldState => ({ ...oldState ,  items }))
+      }).catch (err => console.log('faild to fetch items from the server')
+      )
+      .finally (()=> setState (oldState => ({ ...oldState , loading : false})))
   };
 
   useEffect(() => { 

@@ -14,7 +14,7 @@ const List = (props: IProps) => {
     <div className={classes.wrapper}>
       <Form onSubmit={list.add} />
       {
-        list.items.length > 0
+        !list.loading
         ? <ul>
         {list.items.map(item => (
           <Item
