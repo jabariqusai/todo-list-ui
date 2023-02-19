@@ -11,18 +11,20 @@ const List = (props: IProps) => {
 
   return (
     <div className={classes.wrapper}>
-      {list.loading && <div className='loader'></div>}
       <Form onSubmit={list.add} />
-      <ul>
-        {list.items.map(item => (
-          <Item
-            key={item.id}
-            item={item}
-            remove={list.remove}
-            update={list.update}
-          />
-        ))}
-      </ul>
+      {list.loading
+        ? <div className='loader'>loading... </div>
+        : <ul>
+          {list.items.map(item => (
+            <Item
+              key={item.id}
+              item={item}
+              remove={list.remove}
+              update={list.update}
+            />
+          ))}
+        </ul>
+      }
     </div>
   );
 };
