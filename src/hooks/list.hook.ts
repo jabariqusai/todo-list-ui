@@ -3,46 +3,52 @@ import { Todo } from '../types/todo';
 
 interface IState {
   items: Todo.IItem[];
+  loading: boolean;
 }
 
 const useList = () => {
-  const [state, setState] = useState<IState>({ items: [] });
- 
-  useEffect(()=>{
+  const [state, setState] = useState<IState>({ items: [], loading: true });
+
+  useEffect(() => {
     retrievelist();
-  },[]);
-  
-  const retrievelist=()=>{
-    fetch('http://localhost:3005/list',{method:'GET'})
-    .then(res =>res.json() as Promise<Todo.IItem[]>)
-    .then(items => setState({items}));
+  }, []);
+
+  const retrievelist = () => {
+    setState(oldState => ({ ...state, loading: true }));
+    fetch('http://localhost:3005/list', { method: 'GET' })
+      .then(res => res.json() as Promise<Todo.IItem[]>)
+      .then(items => setState(oldState => ({ ...oldState, items })))
+      .catch(err => { alert('sothing wrong') })
+      .finally(() => setState(oldState => ({ ...oldState, loading: false })));
   };
   //const add = (item: Todo.IItem) => setState(state => ({ ...state, items: state.items.concat(item) }));
   //instead it we do another thing to integrate with BE
- const add = (item :Todo.IItem)=>{
-  
-  const options: RequestInit = {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(item)
- }
- fetch(`http://localhost:3005/list`, options)
- .then(res => {
-   if (res.status === 201) {
-     console.debug('Successfully added item');
-     return  retrievelist();
-   } else {
-     console.debug('Failed', res.status);
-   }
- });
-};
-  
-  //const remove = (id: string) => setState(state => ({ ...state, items: state.items.filter(item => item.id !== id) }));
-  
-  const remove = (id: string) => {
-    fetch(`http://localhost:3005/list/:${id}`, { method: 'DELETE' })
+  const add = (item: Todo.IItem) => {
+
+    const options: RequestInit = {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(item)
+    }
+    fetch(`http://localhost:3005/list`, options)
       .then(res => {
-        if (res.status === 200) {
+        if (res.status === 201) {
+          console.debug('Successfully added item');
+          return retrievelist();
+        } else {
+          console.debug('Failed', res.status);
+        }
+      });
+  };
+
+  //const remove = (id: string) => setState(state => ({ ...state, items: state.items.filter(item => item.id !== id) }));
+
+  const remove = (id: string) => {    
+    fetch(`http://localhost:3005/list/${id}`, { method: 'DELETE' })
+      .then(res => {
+        console.log(res);
+        
+        if (res.status === 204) {
           console.debug('Successfully updated item');
           return retrievelist();
         } else {
@@ -68,7 +74,7 @@ const useList = () => {
       body: JSON.stringify(item)
     };
 
-    fetch(`http://localhost:3005/list/:${item.id}`, options)
+    fetch(`http://localhost:3005/list/${item.id}`, options)
       .then(res => {
         if (res.status === 200) {
           console.debug('Successfully updated item');
