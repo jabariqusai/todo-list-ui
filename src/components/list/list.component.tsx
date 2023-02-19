@@ -1,5 +1,5 @@
 import classes from './list.module.sass';
-
+import './list.css';
 import Form from './form/form.component';
 import { useList } from '../../hooks';
 import Item from './item/item.component';
@@ -11,6 +11,7 @@ const List = (props: IProps) => {
 
   return (
     <div className={classes.wrapper}>
+      {list.loading && <div className='loader'></div>}
       <Form onSubmit={list.add} />
       <ul>
         {list.items.map(item => (
