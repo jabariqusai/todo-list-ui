@@ -3,16 +3,21 @@ import classes from './list.module.sass';
 import Form from './form/form.component';
 import { useList } from '../../hooks';
 import Item from './item/item.component';
+import { useEffect } from 'react';
+import { Todo } from '../../types/todo';
 
 interface IProps { }
 
 const List = (props: IProps) => {
-  const list = useList();
 
+  const list =  useList();
+
+  console.log('list', list.loading);
   return (
     <div className={classes.wrapper}>
       <Form onSubmit={list.add} />
-      <ul>
+     {list.loading ?<div className='loader' ></div>:
+     list.items.length>0&&(<ul>
         {list.items.map(item => (
           <Item
             key={item.id}
@@ -21,7 +26,7 @@ const List = (props: IProps) => {
             update={list.update}
           />
         ))}
-      </ul>
+      </ul>)}
     </div>
   );
 };
