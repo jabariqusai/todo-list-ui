@@ -2,14 +2,13 @@ import classes from './form.module.sass';
 
 import { CaretRight } from 'phosphor-react';
 import { Todo } from '../../../types/todo';
-import { useList } from '../../../hooks';
 
 interface IProps {
   onSubmit: (item: Todo.IItem) => void;
+  clear: () => void;
 }
 
 const Form = (props: IProps) => {
-  const list = useList();
   const submit: React.FormEventHandler<HTMLFormElement> = event => {
     event.preventDefault();
 
@@ -34,7 +33,7 @@ const Form = (props: IProps) => {
         required
       />
       <button type="submit"><CaretRight weight="bold" /></button>
-      <button type="button" className='x' onClick={() => list.clearList()}>x</button>
+      <button type="button" className='x' onClick={props.clear}>x</button>
     </form>
   );
 };
