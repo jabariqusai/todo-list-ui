@@ -11,6 +11,7 @@ const List = (props: IProps) => {
   return (
     <div className={classes.wrapper}>
       <Form onSubmit={list.add} />
+      {list.loading && <span style={{"color":"white"}}>Loading...</span>}
       <ul>
         {list.items.map(item => (
           <Item

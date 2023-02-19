@@ -3,15 +3,17 @@ import { Todo } from '../types/todo';
 
 interface IState {
   items: Todo.IItem[];
+  loading  : boolean
 }
 
 const useList = () => {
-  const [state, setState] = useState<IState>({ items: [] });
+  const [state, setState] = useState<IState>({ items: [] , loading : true});
 
   const retrieveList = () => {
     fetch(`http://localhost:3001/`, { method: 'GET' })
       .then(res => res.json() as Promise<Todo.IItem[]>)
-      .then(items => setState({ items }));
+      .then(items => setState({ items , loading : false }))
+      .finally(() => setState(oldState => ({...oldState , loading : false })))
   };
 
   useEffect(() => {
