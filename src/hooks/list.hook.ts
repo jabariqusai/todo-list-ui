@@ -4,6 +4,7 @@ import { Todo } from '../types/todo';
 interface IState {
   items: Todo.IItem[];
   loading: boolean;
+  submitting: boolean;
 }
 
 interface IResponse {
@@ -12,7 +13,7 @@ interface IResponse {
 }
 
 const useList = () => {
-  const [state, setState] = useState<IState>({ items: [], loading: false });
+  const [state, setState] = useState<IState>({ items: [], loading: false, submitting: false });
 
   const retrieveItems = () => {
 
@@ -37,6 +38,7 @@ const useList = () => {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(item)
     };
+    setState({ ...state, submitting: true });
 
     fetch(`http://localhost:3001/`, options)
 
@@ -47,7 +49,7 @@ const useList = () => {
         } else {
           console.debug('Failed', res.status);
         }
-      });
+      }).finally(() => setState(oldState => ({ ...oldState, submitting: false })));
 
   };
   const remove = (id: string) => {
