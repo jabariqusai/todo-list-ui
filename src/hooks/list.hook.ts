@@ -3,18 +3,17 @@ import { Todo } from '../types/todo';
 
 interface IState {
   items: Todo.IItem[];
+  loading: boolean;
 }
 
 const useList = () => {
-  const [state, setState] = useState<IState>({ items: [] });
-  const [loading, setLoading] = useState(true);
+  const [state, setState] = useState<IState>({ items: [], loading: true });
 
   const retrieveItems = () => {
     fetch('http://localhost:8081/todo', { method: 'GET' })
       .then(res => res.json() as Promise<Todo.IItem[]>)
       .then(items => {
-        setState({ items });
-        setLoading(false);
+        setState({ items, loading: false });
       });
   };
 
@@ -65,7 +64,7 @@ const useList = () => {
     });
   };
 
-  return { ...state, add, remove, update, loading };
+  return { ...state, add, remove, update };
 };
 
 export default useList;
