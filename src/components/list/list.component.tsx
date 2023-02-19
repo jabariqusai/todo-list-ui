@@ -8,11 +8,13 @@ interface IProps { }
 
 const List = (props: IProps) => {
   const list = useList();
+      console.log(list.loading);
 
   return (
     <div className={classes.wrapper}>
-      <Form onSubmit={list.add} />
-      <ul>
+      <Form onSubmit={list.add}  submitting={list.submitting}/> 
+     { list.loading ? <span style={{color:'white'}}>loading....</span>
+     :<ul>
         {list.items.map(item => (
           <Item
             key={item.id}
@@ -21,7 +23,8 @@ const List = (props: IProps) => {
             update={list.update}
           />
         ))}
-      </ul>
+     
+      </ul>}
     </div>
   );
 };
