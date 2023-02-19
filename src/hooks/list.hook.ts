@@ -3,24 +3,25 @@ import { Todo } from '../types/todo';
 
 interface IState {
   items: Todo.IItem[];
+  loading: boolean;
 }
 
 const useList = () => {
-  const [loading, setLoading] = useState<boolean>(true);
-  const [state, setState] = useState<IState>({ items: [] });
+  const [state, setState] = useState<IState>({ items: [], loading: true });
 
   const fetchList = () => {
-    console.log('fetching')
-    setLoading(true);
+    console.log('fetching');
+    setState(oldState => ({ ...oldState, loading: true }));
     fetch('http://localhost:3001/todo', { method: 'GET', })
       .then(res => res.json() as Promise<Todo.IItem[]>)
-      .then(list => setState({ items: list }))
-      .then(() => setLoading(false))
+      .then(list => setState((oldState) => ({ ...oldState, items: list })))
       .then(() => console.log('done!'))
+      .catch(() => console.log('something went wrong'))
+      .finally(() => setState((oldState) => ({ ...oldState, loading: false })));
   };
 
   useEffect(() => {
-    fetchList()
+    fetchList();
   }, []);
 
   const add = (item: Todo.IItem) => {
@@ -86,9 +87,9 @@ const useList = () => {
         else
           console.error(`Something went wrong\n${res.status}`);
       });
-  }
+  };
 
-  return { ...state, add, remove, update, clearList , loading};
+  return { ...state, add, remove, update, clearList };
 };
 
 export default useList;
