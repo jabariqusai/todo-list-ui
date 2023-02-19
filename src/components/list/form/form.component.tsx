@@ -34,9 +34,9 @@ const Form = (props: IProps) => {
       />
       <button type="submit" disabled={props.submitting}>
         {
-          !props.submitting
-            ? <CaretRight weight="bold" />
-            : <Spinner />
+          props.submitting
+            ? <Spinner />
+            : <CaretRight weight="bold" />
         }
       </button>
     </form>

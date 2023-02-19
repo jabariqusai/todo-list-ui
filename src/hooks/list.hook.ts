@@ -48,6 +48,7 @@ const useList = () => {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(item)
     };
+    setState({ ...state, submitting: true });
 
     fetch(`http://localhost:3001/${item.id}`, options)
       .then(res => {
@@ -56,11 +57,15 @@ const useList = () => {
           return retrieveList();
         } else {
           console.debug('Failed', res.status);
+          throw new Error('Failed');
         }
-      });
+      })
+      .catch(() => setState({ ...state, submitting: true }));
   };
 
   const remove = (id: string) => {
+    setState({ ...state, loading: true });
+
     fetch(`http://localhost:3001/${id}`, { method: 'DELETE' })
       .then(res => {
         if (res.status === 200) {
@@ -68,7 +73,12 @@ const useList = () => {
           return retrieveList();
         } else {
           console.debug('Failed', res.status);
+          throw new Error('Failed');
+
         }
+      })
+      .catch(() => {
+        setState(oldState => ({ ...oldState, loading: false }));
       });
   };
 
