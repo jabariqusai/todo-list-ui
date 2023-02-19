@@ -10,17 +10,16 @@ const useList = () => {
   const [loading, setLoading] = useState(true);
 
   const retrieveItems = () => {
-
     fetch('http://localhost:8081/todo', { method: 'GET' })
       .then(res => res.json() as Promise<Todo.IItem[]>)
-      .then(items => setState({ items }));
-
+      .then(items => {
+        setState({ items });
+        setLoading(false);
+      });
   };
 
   useEffect(() => {
-    setLoading(true);
     retrieveItems();
-    setLoading(false);
   }, []);
 
   const add = (item: Todo.IItem) => {
