@@ -28,7 +28,8 @@ const List = (props: IProps) => {
                 update={list.update}
               />
             ))
-        }
+          }
+          {list.items.length === 0 && <span style={{ color: 'white' }}>list empty</span>}
       </ul>
 
     </div>

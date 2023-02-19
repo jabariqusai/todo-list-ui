@@ -33,6 +33,7 @@ const useList = () => {
         retrieveItems();
       }
     }).catch(err => console.error(err));
+    setState({ ...state, loading: true });
 
   };
 
