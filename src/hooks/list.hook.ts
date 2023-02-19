@@ -41,12 +41,20 @@ const useList = () => {
   }
 
   const remove = (id: string) => {
+    setState (oldState => ({...oldState , loading : true}))
     fetch (`http://localhost:3002/todos/${id}`, {method : 'DELETE'})
     .then (res => {
-      console.log('item deleted');
-      return fetchList() ;
+      if (res.status === 204) {
+        console.log('item deleted');
+        return fetchList() ;
+      }
+      else {
+        throw new Error ('failed')
+      }
     })
-    .catch (error => {console.log(error.status);
+    .catch (error => {
+      console.log(error.status);
+      setState (oldState => ({...oldState , loading : false}))
     })
   }
 
