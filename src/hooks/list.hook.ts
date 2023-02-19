@@ -4,11 +4,12 @@ import { Todo } from '../types/todo';
 interface IState {
   items: Todo.IItem[];
   loading : boolean ;
+  submitting : boolean ;
 }
 
 const useList = () => {
   
-  const [state, setState] = useState<IState>({ items: [] , loading : true });
+  const [state, setState] = useState<IState>({ items: [] , loading : true , submitting : false });
   
   const fetchList = () => {
     setState (oldState => ({...oldState , loading : true}))
@@ -31,12 +32,15 @@ const useList = () => {
 
   const add = (item: Todo.IItem) => {
     const option = {method : "POST" , headers : {'Content-Type' : 'application/json'} , body : JSON.stringify(item) }
+    setState (oldState => ({...oldState , submitting: true}))
     fetch ('http://localhost:3002/todos' , option)
     .then (res => {
       console.log('item added');
       return fetchList() ;
     })
-    .catch (error => {console.log(error.status);
+    .catch (error => {console.log(error.status)
+    }).finally (() => {
+      setState (oldState => ({...oldState , submitting : false}))
     })
   }
 
