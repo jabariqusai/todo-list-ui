@@ -4,10 +4,11 @@ import { Todo } from '../types/todo';
 interface IState {
   items: Todo.IItem[];
   loading: boolean;
+  adding:boolean
 }
 
 const useList = () => {
-  const [state, setState] = useState<IState>({ items: [], loading: true });
+  const [state, setState] = useState<IState>({ items: [], loading: true ,adding:false});
 
   useEffect(() => {
     retrievelist();

@@ -12,8 +12,9 @@ const List = (props: IProps) => {
   return (
     <div className={classes.wrapper}>
       <Form onSubmit={list.add} />
-      {list.loading&&<span>loading...</span>}
-      <ul>
+      {list.loading?
+      <span>loading...</span>
+      :<ul>
         {list.items.map(item => (
           <Item
             key={item.id}
@@ -23,6 +24,7 @@ const List = (props: IProps) => {
           />
         ))}
       </ul>
+}
     </div>
   );
 };
