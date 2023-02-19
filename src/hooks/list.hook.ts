@@ -3,16 +3,17 @@ import { Todo } from '../types/todo';
 
 interface IState {
   items: Todo.IItem[];
-  loading  : boolean
+  loading  : boolean,
+  submiiting : boolean
 }
 
 const useList = () => {
-  const [state, setState] = useState<IState>({ items: [] , loading : true});
+  const [state, setState] = useState<IState>({ items: [] , loading : true , submiiting : false});
 
   const retrieveList = () => {
     fetch(`http://localhost:3001/`, { method: 'GET' })
       .then(res => res.json() as Promise<Todo.IItem[]>)
-      .then(items => setState({ items , loading : false }))
+      .then(items => setState(oldState => ({...oldState , loading : false })))
       .finally(() => setState(oldState => ({...oldState , loading : false })))
   };
 
@@ -26,7 +27,7 @@ const useList = () => {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(item)
     };
-
+    setState({...state , submiiting : true})
     fetch('http://localhost:3001/', options)
       .then(res => {
         if (res.status === 201) {
@@ -35,7 +36,8 @@ const useList = () => {
         } else {
           console.debug('Failed', res.status);
         }
-      });
+      })
+    
   };
   const update = (item: Todo.IItem) => {
     const options: RequestInit = {
