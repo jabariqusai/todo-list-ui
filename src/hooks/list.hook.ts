@@ -5,14 +5,22 @@ interface IState {
   items: Todo.IItem[];
 }
 
+interface IResponse {
+  results: Todo.IItem[];
+  total: number;
+}
+
 const useList = () => {
   const [state, setState] = useState<IState>({ items: [] });
 
   const retrieveItems = () => {
 
-    fetch('https://localhost:3001/', { method: 'GET' })
-      .then(res => res.json() as Promise<Todo.IItem[]>)
-      .then(items => setState({ items }));
+    fetch('http://localhost:3001/', { method: 'GET' })
+      .then(res => res.json() as Promise<IResponse>)
+      .then(jsonRes => {
+        setState({ items: jsonRes.results });
+      }
+      );
   };
 
   useEffect(() => {
