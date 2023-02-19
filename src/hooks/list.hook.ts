@@ -3,24 +3,24 @@ import { Todo } from '../types/todo';
 
 interface IState {
     items: Todo.IItem[];
+    loading: boolean;
+    submitting: boolean;
 }
 
 const useList = () => {
-    const [state, setState] = useState<IState>({ items: [] });
-    const [loading, setLoading] = useState<boolean>(true);
+    const [state, setState] = useState<IState>({ items: [], loading: true, submitting: false });
 
     const retrieveList = () => {
+        setState((oldState) => ({ ...oldState, loading: true }));
         fetch('http://localhost:3001/getTasks', { method: 'GET' })
-            .then(response => response.json()
-                .then((res: Todo.IItem[]) => {
-                    setState({ items: res });
-                    setLoading(false);
-                }).catch(err => {
-                    console.log(err);
-                })
-            ).catch(err => {
+            .then(response => response.json())
+            .then((res: Todo.IItem[]) => {
+                setState((oldState) => ({ ...oldState, items: res }));
+            })
+            .catch(err => {
                 console.log(err);
-            });
+            })
+            .finally(() => setState((oldState) => ({ ...oldState, loading: false, submitting: false })));
     };
 
     useEffect(() => {
@@ -28,7 +28,8 @@ const useList = () => {
     }, []);
 
     const add = (item: Todo.IItem) => {
-        setLoading(true);
+        setState((oldState) => ({ ...oldState, submitting: true }));
+
         const options: RequestInit = {
             method: 'POST',
             body: JSON.stringify(item),
@@ -37,29 +38,42 @@ const useList = () => {
 
         fetch('http://localhost:3001/addTask', options)
             .then(res => {
-                if (res.status === 201)
+                if (res.status === 201) {
                     console.log('Item added successfully');
-                else
+                    retrieveList();
+                }
+                else {
                     console.log('Error', res.status);
-                retrieveList();
+                    throw new Error("Field!");
+                }
+            })
+            .catch((err) => {
+                alert(err);
+                setState((oldState) => ({ ...oldState, submitting: false }));
             });
     };
 
     const remove = (id: string) => {
-        setLoading(true);
+        setState((oldState) => ({ ...oldState, loading: true }));
         fetch(`http://localhost:3001/deleteTask/${id}`, { method: 'DELETE' })
             .then(res => {
-                if (res.status === 200)
+                if (res.status === 200) {
                     console.log('Item deleted successfully');
-                else
+                    retrieveList();
+                }
+                else {
                     console.log('Error', res.status);
-                retrieveList();
+                    throw new Error("Field!");
+                }
+            })
+            .catch((err) => {
+                alert(err);
+                setState((oldState) => ({ ...oldState, loading: false }));
             });
-
     };
 
     const update = (updatedItem: Todo.IItem) => {
-        setLoading(true);
+        setState((oldState) => ({ ...oldState, submitting: true }));
         const options: RequestInit = {
             method: 'PUT',
             body: JSON.stringify(updatedItem),
@@ -68,14 +82,20 @@ const useList = () => {
 
         fetch(`http://localhost:3001/editTask/${updatedItem.id}`, options)
             .then(res => {
-                if (res.status === 200)
+                if (res.status === 200) {
                     console.log('Item edited successfully');
-                else
+                    retrieveList();
+                }
+                else {
                     console.log('Error', res.status);
-                retrieveList();
+                    throw new Error("Field!");
+                }
+            }).catch((err) => {
+                alert(err);
+                setState((oldState) => ({ ...oldState, submitting: false }));
             });
     };
-    return { ...state, loading, add, remove, update };
+    return { ...state, add, remove, update };
 };
 
 export default useList;
