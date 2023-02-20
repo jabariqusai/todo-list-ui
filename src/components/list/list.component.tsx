@@ -11,7 +11,7 @@ const List = (props: IProps) => {
 
   return (
     <div className={classes.wrapper}>
-      <Form onSubmit={list.add} />
+      <Form onSubmit={list.add} submited={list.submited} />
       {list.loading?
       <span>loading...</span>
       :<ul>
