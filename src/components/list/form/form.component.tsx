@@ -1,10 +1,11 @@
 import classes from './form.module.sass';
 
-import { CaretRight } from 'phosphor-react';
+import { CaretRight, Spinner } from 'phosphor-react';
 import { Todo } from '../../../types/todo';
 
 interface IProps {
   onSubmit: (item: Todo.IItem) => void;
+  submitting : boolean;
 }
 
 const Form = (props: IProps) => {
@@ -31,7 +32,13 @@ const Form = (props: IProps) => {
         autoComplete="off"
         required
       />
-      <button type="submit"><CaretRight weight="bold" /></button>
+      <button type="submit" disabled = {props.submitting}>
+        {
+          props.submitting 
+          ? <Spinner/>
+          : <CaretRight weight="bold" />
+        }
+        </button>
     </form>
   );
 };

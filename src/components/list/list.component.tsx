@@ -12,7 +12,7 @@ const List = (props: IProps) => {
 
   return (
     <div className={classes.wrapper}>
-      <Form onSubmit={list.add} />
+      <Form onSubmit={list.add} submitting = {list.submitting}/>
       {
         !list.loading
         ? <ul>
