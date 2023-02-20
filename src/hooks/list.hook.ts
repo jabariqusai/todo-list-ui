@@ -4,15 +4,16 @@ import { Todo } from '../types/todo';
 interface IState {
   items: Todo.IItem[];
   loading: boolean;
+  submitting: boolean;
 }
 
 const useList = () => {
-  const [state, setState] = useState<IState>({ items: [], loading: true });
+  const [state, setState] = useState<IState>({ items: [], loading: true, submitting: false });
 
   const fetchList = () => {
     console.log('fetching');
     setState(oldState => ({ ...oldState, loading: true }));
-    fetch('http://localhost:3001/todo', { method: 'GET', })
+    fetch('http://localhost:3001/todo', { method: 'GET' })
       .then(res => res.json() as Promise<Todo.IItem[]>)
       .then(list => setState((oldState) => ({ ...oldState, items: list })))
       .then(() => console.log('done!'))
@@ -25,6 +26,7 @@ const useList = () => {
   }, []);
 
   const add = (item: Todo.IItem) => {
+    setState({ ...state, submitting: true });
     const options = {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -35,15 +37,18 @@ const useList = () => {
       .then(res => {
         if (res.status === 201) {
           console.log(`successfully added '${item.description}'`);
+          setState({ ...state, submitting: false });
           fetchList();
         } else {
           console.error(`Something went wrong\n${res.status}`);
+          setState({ ...state, submitting: false });
         }
       });
 
   };
 
   const update = (updatedItem: Todo.IItem) => {
+    setState({ ...state, loading: true });
     const options = {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
@@ -58,6 +63,7 @@ const useList = () => {
         }
         else
           console.error(`Something went wrong\n${res.status}`);
+        setState({ ...state, loading: false });
       });
   };
 
@@ -70,8 +76,10 @@ const useList = () => {
           console.log(`successfully deleted`);
           fetchList();
         }
-        else
+        else {
+          setState({ ...state, loading: false });
           console.error(`Something went wrong\n${res.status}`);
+        }
       });
   };
 

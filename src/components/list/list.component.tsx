@@ -9,11 +9,10 @@ interface IProps { }
 const List = (props: IProps) => {
   const list = useList();
 
-  
   return (
     <div className={classes.wrapper}>
-      {list.loading && <p style={{"color": "white", "position": "absolute", "top": 100}}>loading...</p>}
-      <Form clear={list.clearList} onSubmit={list.add} />
+      {list.loading && <p style={{ "color": "white", "position": "absolute", "top": 100 }}>loading...</p>}
+      <Form submitting={list.submitting} clear={list.clearList} onSubmit={list.add} />
       <ul>
         {list.items.map(item => (
           <Item
