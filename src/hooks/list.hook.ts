@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import Todoservices from '../Service/service';
 import { Todo } from '../types/todo';
 
 interface IState {
@@ -7,13 +8,14 @@ interface IState {
   submiiting : boolean
 }
 
+const api = new Todoservices();
+
 const useList = () => {
   const [state, setState] = useState<IState>({ items: [] , loading : true , submiiting : false});
 
   const retrieveList = () => {
-    fetch(`http://localhost:3001/`, { method: 'GET' })
-      .then(res => res.json() as Promise<Todo.IItem[]>)
-      .then(items => setState(oldState => ({...oldState , loading : false })))
+    api.getItem()
+      .then(items => setState(oldState => ({...oldState ,items})))
       .finally(() => setState(oldState => ({...oldState , loading : false })))
   };
 
@@ -22,49 +24,40 @@ const useList = () => {
   }, []);
 
   const add = (item: Todo.IItem) => {
-    const options: RequestInit = {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(item)
-    };
-    setState({...state , submiiting : true})
-    fetch('http://localhost:3001/', options)
-      .then(res => {
-        if (res.status === 201) {
+   
+    setState({...state , loading : true})
+     api.add(item)
+      .then(success => {
+        if (success) {
           console.debug('Successfully added item');
           return retrieveList();
         } else {
-          console.debug('Failed', res.status);
+          console.debug('Failed');
         }
       })
+      .finally(() => setState({...state , loading : false}) )
     
   };
   const update = (item: Todo.IItem) => {
-    const options: RequestInit = {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(item)
-    };
-
-    fetch(`http://localhost:3001/${item.id}`, options)
-      .then(res => {
-        if (res.status === 200) {
+     api.update(item)
+      .then(success => {
+        if (success) {
           console.debug('Successfully updated item');
           return retrieveList();
         } else {
-          console.debug('Failed', res.status);
+          console.debug('Failed');
         }
       });
   };
 
   const remove = (id: string) => {
-    fetch(`http://localhost:3001/${id}`, { method: 'DELETE' })
-      .then(res => {
-        if (res.status === 200) {
+    api.remove(id)
+      .then(success => {
+        if (success) {
           console.debug('Successfully updated item');
           return retrieveList();
         } else {
-          console.debug('Failed', res.status);
+          console.debug('Failed');
         }
       });
   };
