@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import TodoServise from '../servises/todo.servise';
 import { Todo } from '../types/todo';
 
 interface IState {
@@ -11,52 +12,51 @@ interface IState {
 const useList = () => {
 
   const [state, setState] = useState<IState>({ items: [], loading: true, submitting: false, updating: false });
-
-  const fetchList = () => {
-    setState(oldState => ({ ...oldState, loading: true }));
-    fetch('http://localhost:3002/todos', { method: 'GET' })
-      .then(res => res.json() as Promise<Todo.IItem[]>)
-      .then(items => {
-        console.log('items fetched');
-        console.log(state.loading);
-
-        setState(oldState => ({ ...oldState, items }));
-      }).catch(err => console.log('faild to fetch items from the server')
-      )
-      .finally(() => setState(oldState => ({ ...oldState, loading: false })));
-  };
+  const api = new TodoServise() ;
 
   useEffect(() => {
-    fetchList();
+    setState(oldState => ({ ...oldState, loading: true }));
+    api.fetchData().then (items => {
+      setState(oldState => ({...oldState , items , loading: false}))
+    })
+    .catch(error => {
+      console.log(error.status);
+      setState (oldState => ({...oldState , loading : false}))
+    });
   }, []);
 
 
   const add = (item: Todo.IItem) => {
-    const option = { method: "POST", headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(item) };
     setState(oldState => ({ ...oldState, submitting: true }));
-    fetch('http://localhost:3002/todos', option)
-      .then(res => {
-        console.log('item added');
-        return fetchList();
+    let items = state.items ;
+    api.add(item)
+      .then(async success => {
+        if ( success) {
+          items = await api.fetchData() ;
+        } else {
+          console.log('faild to add the sent item');
+        }
+        setState (oldState => ({...oldState  ,  items, submitting : false}))
       })
       .catch(error => {
         console.log(error.status);
-      }).finally(() => {
-        setState(oldState => ({ ...oldState, submitting: false }));
+        setState (oldState => ({...oldState , submitting : false}))
       });
   };
 
   const remove = (id: string) => {
     setState(oldState => ({ ...oldState, loading: true }));
-    fetch(`http://localhost:3002/todos/${id}`, { method: 'DELETE' })
-      .then(res => {
-        if (res.status === 204) {
+    let items = state.items ;
+    api.remove(id)
+      .then(async success => {
+        if (success) {
           console.log('item deleted');
-          return fetchList();
+          items = await api.fetchData();
         }
         else {
-          throw new Error('failed');
+          console.log('deletign faild');
         }
+        setState ( oldState => ({...oldState , items  , loading : false}))
       })
       .catch(error => {
         console.log(error.status);
@@ -66,21 +66,21 @@ const useList = () => {
 
   const update = (updatedItem: Todo.IItem) => {
     setState(oldState => ({ ...oldState, updating: true }));
-    const option = { method: "PUT", headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(updatedItem) };
-    fetch(`http://localhost:3002/todos/${updatedItem.id}`, option)
-      .then(res => {
-        console.log('item updated');
-        fetch('http://localhost:3002/todos', { method: 'GET' })
-          .then(async res =>{
-            const items = await  res.json() ;
-            setState(oldState => ({ ...oldState, items }));
-          }).catch(err => console.log('faild to fetch items from the server')
-          );
+    let items = state.items ;
+    api.update(updatedItem)
+      .then(async success => {
+        if (success) {
+          items = await api.fetchData() ;
+        }
+        else {
+          console.log('faild to update this item');
+        }
+        setState (oldState => ({...oldState , items , updating : false}))
       })
       .catch(error => {
         console.log(error.status);
+        setState (oldState => ({...oldState , updating: false}))
       })
-      .finally(() => {setState (oldState => ({...oldState , updating : false}))})
   };
 
   return { ...state, add, remove, update };
