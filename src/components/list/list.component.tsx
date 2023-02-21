@@ -10,7 +10,6 @@ interface IProps { }
 const List = (props: IProps) => {
     const list = useList();
     const loading = list.loading;
-    console.log('loading', loading);
 
     return (
         <div className={classes.wrapper}>

@@ -1,98 +1,85 @@
 import { useEffect, useState } from 'react';
+import ToDoApi from '../services/todo.service';
 import { Todo } from '../types/todo';
 
+const api = new ToDoApi('http://localhost:3001');
 interface IState {
     items: Todo.IItem[];
     loading: boolean;
-    submitting: boolean;
 }
 
 const useList = () => {
-    const [state, setState] = useState<IState>({ items: [], loading: true, submitting: false });
+    const [state, setState] = useState<IState>({ items: [], loading: false });
 
     const retrieveList = () => {
-        setState((oldState) => ({ ...oldState, loading: true }));
-        fetch('http://localhost:3001/getTasks', { method: 'GET' })
-            .then(response => response.json())
-            .then((res: Todo.IItem[]) => {
-                setState((oldState) => ({ ...oldState, items: res }));
+        api.getItems()
+            .then((newItems: Todo.IItem[]) => {
+                setState((oldState) => ({ ...oldState, items: newItems, loading: false }));
             })
-            .catch(err => {
-                console.log(err);
-            })
-            .finally(() => setState((oldState) => ({ ...oldState, loading: false, submitting: false })));
+            .catch(error => {
+                console.log(error);
+                setState((oldState) => ({ ...oldState, loading: false }));
+            });
     };
 
     useEffect(() => {
+        setState((oldState) => ({ ...oldState, loading: true }));
         retrieveList();
     }, []);
 
     const add = (item: Todo.IItem) => {
-        setState((oldState) => ({ ...oldState, submitting: true }));
+        setState((oldState) => ({ ...oldState, loading: true }));
 
-        const options: RequestInit = {
-            method: 'POST',
-            body: JSON.stringify(item),
-            headers: { 'Content-Type': 'application/json' }
-        };
-
-        fetch('http://localhost:3001/addTask', options)
-            .then(res => {
-                if (res.status === 201) {
+        api.add(item)
+            .then(success => {
+                if (success) {
                     console.log('Item added successfully');
-                    retrieveList();
-                }
-                else {
-                    console.log('Error', res.status);
-                    throw new Error("Field!");
+                    return retrieveList();
                 }
             })
-            .catch((err) => {
-                alert(err);
-                setState((oldState) => ({ ...oldState, submitting: false }));
+            .catch(error => {
+                console.log(error);
+                setState((oldState) => ({ ...oldState, loading: false }));
             });
     };
 
     const remove = (id: string) => {
         setState((oldState) => ({ ...oldState, loading: true }));
-        fetch(`http://localhost:3001/deleteTask/${id}`, { method: 'DELETE' })
-            .then(res => {
-                if (res.status === 200) {
+
+        api.remove(id)
+            .then(success => {
+                if (success) {
                     console.log('Item deleted successfully');
                     retrieveList();
                 }
                 else {
-                    console.log('Error', res.status);
+                    console.log('Error');
                     throw new Error("Field!");
                 }
             })
-            .catch((err) => {
-                alert(err);
+            .catch(error => {
+                console.log(error);
                 setState((oldState) => ({ ...oldState, loading: false }));
             });
     };
 
     const update = (updatedItem: Todo.IItem) => {
-        setState((oldState) => ({ ...oldState, submitting: true }));
-        const options: RequestInit = {
-            method: 'PUT',
-            body: JSON.stringify(updatedItem),
-            headers: { 'Content-Type': 'application/json' }
-        };
+        setState((oldState) => ({ ...oldState, loading: true }));
 
-        fetch(`http://localhost:3001/editTask/${updatedItem.id}`, options)
-            .then(res => {
-                if (res.status === 200) {
+        api.update(updatedItem)
+            .then(success => {
+                if (success) {
                     console.log('Item edited successfully');
-                    retrieveList();
+                    return retrieveList();
                 }
                 else {
-                    console.log('Error', res.status);
+                    console.log('Error');
                     throw new Error("Field!");
                 }
-            }).catch((err) => {
-                alert(err);
-                setState((oldState) => ({ ...oldState, submitting: false }));
+            })
+            .catch(error => {
+                console.log(error);
+                setState((oldState) => ({ ...oldState, loading: false }));
             });
     };
     return { ...state, add, remove, update };
