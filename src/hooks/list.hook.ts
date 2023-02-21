@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import ToDoService from '../services/todo.service';
 import { Todo } from '../types/todo';
 
 interface IState {
@@ -6,82 +7,76 @@ interface IState {
   loading: boolean;
 }
 
+const api = new ToDoService();
+
 const useList = () => {
+
+  api.fetchItems();
 
   const [state, setState] = useState<IState>({ items: [], loading: false });
 
-  const fetchItems = () => {
-    setState((oldItems) => ({ ...oldItems, loading: true }));
-    fetch('http://localhost:3001', { method: 'GET' })
-      .then(res => res.json() as Promise<Todo.IItem[]>)//never forget the [] due to it is an array
-      .then(items => setState(oldState => ({ ...oldState, items })))
-      .catch (err => { alert("something wrong"); })
-      .finally(() => setState(oldState => ({ ...oldState, loading: false })))
+  useEffect(() => {
+
+    setState((state) => ({ ...state, loading: true }));
+
+    api.fetchItems()
+      .then(items => setState(state => ({ ...state, items, loading: false })))
+      .catch(err => {
+        alert("something wrong");
+        setState(oldState => ({ ...oldState, loading: false }));
+      });
+
+  }, []);
+
+  // should integrate the post feature
+  const add = (item: Todo.IItem) => {
+    // options with RequestInit will show the request body which will be send in the fetch function 
+
+    setState({ ...state, loading: true });
+    
+   api.add(item)
+      .then(success => {
+        if (success) {
+          console.log("successfully added items ");
+          return api.fetchItems();
+        } else {
+          console.log("failed added items");
+
+        }
+      });
+
   };
 
-useEffect(() => {
-  fetchItems();
-}, []);
 
-// should integrate the post feature
-const add = (item: Todo.IItem) => {
-  // options with RequestInit will show the request body which will be send in the fetch function 
+  const remove = (id: string) =>
 
-  const options: RequestInit = {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(item)
+    api.remove(id)
+      .then(success => {
+        if (success) {
+          console.log("deleted successfully");
+          return api.fetchItems();
+        } else {
+          console.log('failed to delete items ');
+        }
+      });
+
+
+  const update = (updatedItem: Todo.IItem) => {
+
+    api.update(updatedItem)
+      .then(success => {
+        if (success) {
+          console.log("updated successfully");
+          return api.fetchItems();
+        } else {
+          console.log('failed updated');
+          return api.fetchItems();
+        }
+      });
+
   };
 
-  fetch('http://localhost:3001/', options)
-    .then(res => {
-      if (res.status === 201) {
-        console.log("successfully added items ");
-        return fetchItems();
-      } else {
-        console.log("failed added items", res.status);
-
-      }
-    });
-
-};
-
-const remove = (id: string) => {
-  fetch(`http://localhost:3001/${id}`, { method: 'DELETE' })
-    .then(res => {
-      if (res.status === 200) {
-        console.log("deleted successfully");
-        return fetchItems();
-      } else {
-        console.log('failed to delete items ', res.status);
-      }
-    });
-};
-
-const update = (updatedItem: Todo.IItem) => {
-
-  const options: RequestInit = {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(updatedItem)
-  };
-
-  fetch(`http://localhost:3001/${updatedItem.id}`, options)
-    .then(res => {
-      if (res.status === 201) {
-        console.log("updated successfully", res.status);
-        return fetchItems();
-      } else {
-        console.log('failed updated', res.status);
-        return fetchItems();
-      }
-    });
-
-};
-
-return { ...state, add, remove, update };
+  return { ...state, add, remove, update };
 };
 
 export default useList;
