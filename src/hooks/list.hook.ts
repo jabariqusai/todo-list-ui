@@ -13,10 +13,9 @@ const useList = () => {
   const [state, setState] = useState<IState>({ items: [], loading: true });
 
   const retrieveItems = () => {
-    api.getItems().then(items => {
-      console.log('hi');
-      setState({ ...state, items, loading: false });
-    });
+    api.getItems()
+      .then(items => setState({ items, loading: false }));
+
   };
 
   useEffect(() => {
@@ -26,7 +25,6 @@ const useList = () => {
   const add = async (item: Todo.IItem) => {
     const success = await api.add(item);
     if (success) {
-      console.log('added');
       retrieveItems();
     }
   };
