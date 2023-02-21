@@ -1,72 +1,51 @@
 import { useEffect, useState } from 'react';
+import ToDoService from '../services/todo.service';
 import { Todo } from '../types/todo';
 
 interface IState {
   items: Todo.IItem[];
+  loading: boolean;
 }
 
+const api = new ToDoService();
+
 const useList = () => {
-  const [state, setState] = useState<IState>({ items: [] });
-  const [loading, setLoading] = useState(true);
+  const [state, setState] = useState<IState>({ items: [], loading: true });
 
   const retrieveItems = () => {
-
-    fetch('http://localhost:8081/todo', { method: 'GET' })
-      .then(res => res.json() as Promise<Todo.IItem[]>)
-      .then(items => setState({ items }));
-
+    api.getItems().then(items => {
+      console.log('hi');
+      setState({ ...state, items, loading: false });
+    });
   };
 
   useEffect(() => {
-    setLoading(true);
     retrieveItems();
-    setLoading(false);
   }, []);
 
-  const add = (item: Todo.IItem) => {
-    fetch('http://localhost:8081/todo', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ ...item }),
-    }).then(res => {
-      if (res.status === 201) {
-        retrieveItems();
-      }
-    }).catch(err => console.error(err));
-
+  const add = async (item: Todo.IItem) => {
+    const success = await api.add(item);
+    if (success) {
+      console.log('added');
+      retrieveItems();
+    }
   };
 
-  const remove = (id: string) => {
-    fetch(`http://localhost:8081/todo/${id}`, {
-      method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-    }).then(res => {
-      if (res.status === 200) {
-        retrieveItems();
-      }
-    });
+  const remove = async (id: string) => {
+    const success = await api.remove(id);
+    if (success) {
+      retrieveItems();
+    }
   };
 
-  const update = (updatedItem: Todo.IItem) => {
-
-    fetch('http://localhost:8081/todo', {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ ...updatedItem }),
-    }).then(res => {
-      if (res.status === 200) {
-        retrieveItems();
-      }
-    });
+  const update = async (updatedItem: Todo.IItem) => {
+    const success = await api.update(updatedItem);
+    if (success) {
+      retrieveItems();
+    }
   };
 
-  return { ...state, add, remove, update, loading };
+  return { ...state, add, remove, update };
 };
 
 export default useList;
