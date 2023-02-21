@@ -7,37 +7,33 @@ interface IState {
   loading: boolean;
 }
 
-// interface IResponse {
-//   results: Todo.IItem[];
-//   total: number;
-// }
-
 const api = new TodoApi();
 
 const useList = () => {
 
   const [state, setState] = useState<IState>({ items: [], loading: false });
 
+ 
+  //get part
   const retrieveItems = () => {
 
     setState(oldState => ({ ...oldState, loading: true }));
 
     api.getItems()
-
       .then(items => { setState(oldState => ({ ...oldState, items: items })); })
       .catch(err => {
         alert("something went wrong !");
         console.error(err);
       })
       .finally(() => setState(oldState => ({ ...oldState, loading: false })));
-
   };
 
   useEffect(() => {
     retrieveItems();
-
   }, []);
 
+
+  //add part
   const add = (item: Todo.IItem) => {
 
     setState({ ...state, loading: true });
@@ -51,8 +47,9 @@ const useList = () => {
           console.debug('Failed');
         }
       }).finally(() => setState(oldState => ({ ...oldState , })));
-
   };
+
+  //delete part
   const remove = (id: string) => {
 
     setState({ ...state, loading: true });
@@ -68,14 +65,12 @@ const useList = () => {
           throw new Error('Delete Failed');
         }
       })
-
       .catch(() => {
         setState(oldState => ({ ...oldState, loading: false }));
       });
-
-
   };
 
+  //update part
   const update = (updatedItem: Todo.IItem) => {
 
     setState({ ...state });
@@ -92,6 +87,7 @@ const useList = () => {
       })
       .catch(() => setState({ ...state }));
   };
+  
 
   return { ...state, add, remove, update };
 };
