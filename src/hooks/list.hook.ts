@@ -14,6 +14,7 @@ const useList = () => {
   const [state, setState] = useState<IState>({ items: [], loading: true, submitting: false, updating: false });
   const api = new TodoServise() ;
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     setState(oldState => ({ ...oldState, loading: true }));
     api.fetchData().then (items => {
