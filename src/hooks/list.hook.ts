@@ -73,7 +73,7 @@ const useList = () => {
   //update part
   const update = (updatedItem: Todo.IItem) => {
 
-    setState({ ...state });
+    setState({ ...state ,loading:true });
 
     api.update(updatedItem)
       .then(async updated => {
@@ -87,7 +87,7 @@ const useList = () => {
       })
       .catch(() => setState({ ...state }));
   };
-  
+
 
   return { ...state, add, remove, update };
 };
