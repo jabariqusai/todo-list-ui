@@ -22,7 +22,10 @@ const useList = () => {
     fetch('http://localhost:3001/', { method: 'GET' })
       .then(res => res.json() as Promise<IResponse>)
       .then(jsonRes => { setState(oldState => ({ ...oldState, items: jsonRes.results })); })
-      .catch(err => { alert("something went wrong !"); })
+      .catch(err => {
+        alert("something went wrong !");
+        console.error(err);
+      })
       .finally(() => setState(oldState => ({ ...oldState, loading: false })));
 
   };
@@ -97,7 +100,7 @@ const useList = () => {
           throw new Error('update Failed!');
         }
       })
-      .catch(() => setState({ ...state, submitting: true }));
+      .catch(() => setState({ ...state, submitting: false }));
   };
 
   return { ...state, add, remove, update };
