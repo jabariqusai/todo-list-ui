@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react';
 import { Todo } from '../types/todo';
+import TodoApi from './service/todo.service';
 
 interface IState {
   items: Todo.IItem[];
   loading: boolean;
   submited:boolean;
 }
-
+const api = new TodoApi();
 const useList = () => {
   const [state, setState] = useState<IState>({ items: [], loading: false ,submited:false});
 
@@ -16,28 +17,26 @@ const useList = () => {
 
   const retrievelist = () => {
     setState(oldState => ({ ...oldState, loading: true }));
-    fetch('http://localhost:3005/list', { method: 'GET' })
-      .then(res => res.json() as Promise<Todo.IItem[]>)
+    api.getItems()
       .then(items => setState(oldState => ({ ...oldState, items })))
-      .catch(err => { alert('sothing wrong') })
+      .catch(err => { 
+        alert('sothing wrong') ;
+        console.error(err);
+        
+      })
       .finally(() => setState(oldState => ({ ...oldState, loading: false })));
   };
   
   const add = (item: Todo.IItem) => {
 
-    const options: RequestInit = {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(item)
-    }
-    setState({...state,submited:true})
-    fetch(`http://localhost:3005/list`, options)
-      .then(res => {
-        if (res.status === 201) {
+    setState({...state,submited:true});
+    api.add(item)
+      .then(success=> {
+        if (success) {
           console.debug('Successfully added item');
           return retrievelist();
         } else {
-          console.debug('Failed', res.status);
+          console.debug('Failed');
         }
       })
       .finally(()=>setState(oldState=>({...oldState,submited:false})))
@@ -47,15 +46,13 @@ const useList = () => {
 
   const remove = (id: string) => { 
     setState({...state,loading:true})   
-    fetch(`http://localhost:3005/list/${id}`, { method: 'DELETE' })
-      .then(res => {
-        console.log(res);
-        
-        if (res.status === 204) {
+   api.remove(id)
+      .then(success => {
+        if (success) {
           console.debug('Successfully updated item');
           return retrievelist();
         } else {
-          console.debug('Failed', res.status);
+          console.debug('Failed');
           throw new Error('Failed');
         }
       })
@@ -67,19 +64,13 @@ const useList = () => {
 
 
   const update = (item: Todo.IItem) => {
-    const options: RequestInit = {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(item)
-    };
-
-    fetch(`http://localhost:3005/list/${item.id}`, options)
-      .then(res => {
-        if (res.status === 200) {
+   api.update(item)
+      .then(success=> {
+        if (success) {
           console.debug('Successfully updated item');
           return retrievelist();
         } else {
-          console.debug('Failed', res.status);
+          console.debug('Failed', );
           throw new Error('Failed');
         }
       }) .catch(() => setState({ ...state, submited: true }));
