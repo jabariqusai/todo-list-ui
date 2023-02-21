@@ -12,7 +12,7 @@ const List = (props: IProps) => {
 
   return (
     <div className={classes.wrapper}>
-      <Form onSubmit={list.add}  submitting={list.submitting}/> 
+      <Form onSubmit={list.add}  loading={list.loading}/> 
      { list.loading ? <span style={{color:'white'}}>loading....</span>
      :<ul>
         {list.items.map(item => (

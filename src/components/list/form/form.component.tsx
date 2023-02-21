@@ -5,8 +5,7 @@ import { Todo } from '../../../types/todo';
 
 interface IProps {
   onSubmit: (item: Todo.IItem) => void;
-  submitting: boolean;
-
+  loading: boolean;
 }
 
 const Form = (props: IProps) => {
@@ -33,14 +32,9 @@ const Form = (props: IProps) => {
         autoComplete="off"
         required
       />
-      <button type="submit" disabled={props.submitting}>
-        {
-          !props.submitting?
-          <CaretRight weight="bold" />
-          :<Spinner/>        
-
-        }
-        </button>
+    <button type="submit" disabled={props.loading}>
+        <CaretRight weight="bold" />
+      </button>
     </form>
   );
 };
