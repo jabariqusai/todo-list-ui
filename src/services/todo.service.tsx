@@ -14,6 +14,8 @@ class TodoApi {
       .then(res => res.json() as Promise<Todo.IItem[]>);
   };
 
+
+
   add = (item: Todo.IItem) => {
     const options: RequestInit = {
       method: 'POST',
@@ -24,6 +26,9 @@ class TodoApi {
     return fetch(`${this.API}/`, options)
       .then(res => res.status === 201);
   };
+
+
+
 
   update = (item: Todo.IItem) => {
     const options: RequestInit = {
@@ -36,6 +41,9 @@ class TodoApi {
       .then(res => res.status === 204);
   };
 
+
+
+  
   remove = (id: string) => {
     return fetch(`${this.API}/${id}`, { method: 'DELETE' })
       .then(res => res.status === 204);
