@@ -54,6 +54,8 @@ const useList = () => {
   };
   const remove = (id: string) => {
 
+    setState({ ...state, loading: true });
+
     fetch(`http://localhost:3001/${id}`, { method: 'DELETE' })
 
       .then(res => {
@@ -62,10 +64,15 @@ const useList = () => {
           return retrieveItems();
 
         } else {
-          console.debug('delete Failed', res.status);
+          console.debug('Delete Failed', res.status);
+          throw new Error('Delete Failed');
         }
+      })
+
+      .catch(() => {
+        setState(oldState => ({ ...oldState, loading: false }));
       });
-    // setState(state => ({ ...state, items: state.items.filter(item => item.id !== id) }));
+
 
   };
 
@@ -77,6 +84,8 @@ const useList = () => {
       body: JSON.stringify(updatedItem)
     };
 
+    setState({ ...state, submitting: true });
+
     fetch(`http://localhost:3001/${updatedItem.id}`, options)
 
       .then(res => {
@@ -85,8 +94,10 @@ const useList = () => {
           return retrieveItems();
         } else {
           console.debug('update Failed!', res.status);
+          throw new Error('update Failed!');
         }
-      });
+      })
+      .catch(() => setState({ ...state, submitting: true }));
   };
 
   return { ...state, add, remove, update };

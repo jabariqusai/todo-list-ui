@@ -1,6 +1,6 @@
 import classes from './form.module.sass';
 
-import { CaretRight , Spinner } from 'phosphor-react';
+import { CaretRight, Spinner } from 'phosphor-react';
 import { Todo } from '../../../types/todo';
 
 interface IProps {
@@ -34,9 +34,9 @@ const Form = (props: IProps) => {
       />
       <button type="submit" disabled={props.submitting}>
         {
-          !props.submitting
-            ? <CaretRight weight="bold" />
-            : <Spinner />
+          props.submitting
+            ? <Spinner />
+            : <CaretRight weight="bold" />
         }
       </button>
     </form>
