@@ -28,7 +28,7 @@ const useList = () => {
 
     api.add(item)
       .then(async success => {
-        let items: Todo.IItem[] = state.items;
+        let items = state.items;
 
         if (success) {
           console.debug('Successfully added item');
