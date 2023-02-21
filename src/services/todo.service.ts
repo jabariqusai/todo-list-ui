@@ -1,11 +1,7 @@
 import { Todo } from '../types/todo';
 
 class TodoApi {
-  private API: string;
-
-  constructor() {
-    this.API = 'http://localhost:3001';
-  }
+  private API: string = 'http://localhost:3001';
 
   getItems = () => {
     return fetch(`${this.API}/`, { method: 'GET' })
