@@ -11,7 +11,7 @@ const List = (props: IProps) => {
 
   return (
     <div className={classes.wrapper}>
-      <Form onSubmit={list.add} submitting={list.submitting} />
+      <Form onSubmit={list.add} loading={list.loading} />
       <div className={classes.listWrapper}>
         {list.loading && <div className={classes.backdrop}><CircleNotch size={46} /></div>}
         <ul>

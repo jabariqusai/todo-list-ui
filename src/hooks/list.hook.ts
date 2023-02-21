@@ -1,27 +1,30 @@
 import { useEffect, useState } from 'react';
 import { Todo } from '../types/todo';
+import TodoApi from '../components/services/todo.services';
 
 interface IState {
   items: Todo.IItem[];
   loading: boolean;
-  submitting: boolean;
 }
 
-interface IResponse {
-  results: Todo.IItem[];
-  total: number;
-}
+// interface IResponse {
+//   results: Todo.IItem[];
+//   total: number;
+// }
+
+const api = new TodoApi();
 
 const useList = () => {
-  const [state, setState] = useState<IState>({ items: [], loading: false, submitting: false });
+
+  const [state, setState] = useState<IState>({ items: [], loading: false });
 
   const retrieveItems = () => {
 
     setState(oldState => ({ ...oldState, loading: true }));
 
-    fetch('http://localhost:3001/', { method: 'GET' })
-      .then(res => res.json() as Promise<IResponse>)
-      .then(jsonRes => { setState(oldState => ({ ...oldState, items: jsonRes.results })); })
+    api.getItems()
+
+      .then(items => { setState(oldState => ({ ...oldState, items: items })); })
       .catch(err => {
         alert("something went wrong !");
         console.error(err);
@@ -32,42 +35,36 @@ const useList = () => {
 
   useEffect(() => {
     retrieveItems();
+
   }, []);
 
   const add = (item: Todo.IItem) => {
 
-    const options: RequestInit = {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(item)
-    };
-    setState({ ...state, submitting: true });
+    setState({ ...state, loading: true });
 
-    fetch(`http://localhost:3001/`, options)
-
-      .then(res => {
-        if (res.status === 201) {
+    api.add(item)
+      .then(async success => {
+        if (success) {
           console.debug('item added Successfully!');
           retrieveItems();
         } else {
-          console.debug('Failed', res.status);
+          console.debug('Failed');
         }
-      }).finally(() => setState(oldState => ({ ...oldState, submitting: false })));
+      }).finally(() => setState(oldState => ({ ...oldState , })));
 
   };
   const remove = (id: string) => {
 
     setState({ ...state, loading: true });
 
-    fetch(`http://localhost:3001/${id}`, { method: 'DELETE' })
-
-      .then(res => {
-        if (res.status === 204) {
+    api.remove(id)
+      .then(async deleted => {
+        if (deleted) {
           console.debug('item deleted Successfully!');
           return retrieveItems();
 
         } else {
-          console.debug('Delete Failed', res.status);
+          console.debug('Delete Failed');
           throw new Error('Delete Failed');
         }
       })
@@ -81,26 +78,19 @@ const useList = () => {
 
   const update = (updatedItem: Todo.IItem) => {
 
-    const options: RequestInit = {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(updatedItem)
-    };
+    setState({ ...state });
 
-    setState({ ...state, submitting: true });
-
-    fetch(`http://localhost:3001/${updatedItem.id}`, options)
-
-      .then(res => {
-        if (res.status === 205) {
+    api.update(updatedItem)
+      .then(async updated => {
+        if (updated) {
           console.debug('item updated Successfully!');
           return retrieveItems();
         } else {
-          console.debug('update Failed!', res.status);
+          console.debug('update Failed!');
           throw new Error('update Failed!');
         }
       })
-      .catch(() => setState({ ...state, submitting: false }));
+      .catch(() => setState({ ...state }));
   };
 
   return { ...state, add, remove, update };
