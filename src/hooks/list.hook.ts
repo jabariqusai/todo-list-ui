@@ -1,85 +1,96 @@
 import { useEffect, useState } from 'react';
+import TodoApi from '../services/todo.service';
 import { Todo } from '../types/todo';
 
 interface IState {
   items: Todo.IItem[];
   loading: boolean;
-  submitting: boolean;
 }
 
-const useList = () => {
-  const [state, setState] = useState<IState>({ items: [], loading: false, submitting: false });
+const api = new TodoApi();
 
-  const retrieveList = () => {
-    setState(oldState => ({ ...oldState, loading: true }));
-    fetch('http://localhost:3001/', { method: 'GET' })
-      .then(res => res.json() as Promise<Todo.IItem[]>)
-      .then(items => setState(oldState => ({ ...oldState, items })))
-      .catch(err => { alert("Something went wrong!"); })
-      .finally(() => setState(oldState => ({ ...oldState, loading: false })));
-  };
+const useList = () => {
+  const [state, setState] = useState<IState>({ items: [], loading: false });
 
   useEffect(() => {
-    retrieveList();
+    setState(state => ({ ...state, loading: true }));
+
+    api.getItems()
+      .then((items) => setState(state => ({ ...state, items, loading: false })))
+      .catch(error => {
+        console.error(error);
+        setState(state => ({ ...state, loading: false }));
+      });;
   }, []);
 
   const add = (item: Todo.IItem) => {
-    const options: RequestInit = {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(item)
-    };
-    setState({ ...state, submitting: true });
+    setState({ ...state, loading: true });
 
-    fetch(`http://localhost:3001/`, options)
-      .then(res => {
-        if (res.status === 201) {
+    api.add(item)
+      .then(async success => {
+        let items: Todo.IItem[] = state.items;
+
+        if (success) {
           console.debug('Successfully added item');
-          return retrieveList();
+
+          items = await api.getItems();
         } else {
-          console.debug('Failed', res.status);
+          console.debug('Failed');
         }
-      }).finally(() => setState(oldState => ({ ...oldState, submitting: false })));
+
+        setState(state => ({ ...state, items, loading: false }));
+      })
+      .catch(error => {
+        console.error(error);
+        setState(state => ({ ...state, loading: false }));
+      });
   };
 
   const update = (item: Todo.IItem) => {
-    const options: RequestInit = {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(item)
-    };
-    setState({ ...state, submitting: true });
+    setState({ ...state, loading: true });
 
-    fetch(`http://localhost:3001/${item.id}`, options)
-      .then(res => {
-        if (res.status === 200) {
+    api.update(item)
+      .then(async success => {
+        let items = state.items;
+
+        if (success) {
           console.debug('Successfully updated item');
-          return retrieveList();
+          items = await api.getItems();
+
+
         } else {
-          console.debug('Failed', res.status);
-          throw new Error('Failed');
+          console.log("failed")
         }
+
+
+        setState(state => ({ ...state, items, loading: false }));
       })
-      .catch(() => setState({ ...state, submitting: true }));
+      .catch(error => {
+        console.error(error);
+        setState(state => ({ ...state, loading: false }));
+      });;
   };
 
   const remove = (id: string) => {
     setState({ ...state, loading: true });
 
-    fetch(`http://localhost:3001/${id}`, { method: 'DELETE' })
-      .then(res => {
-        if (res.status === 200) {
-          console.debug('Successfully updated item');
-          return retrieveList();
-        } else {
-          console.debug('Failed', res.status);
-          throw new Error('Failed');
+    api.remove(id)
+      .then(async success => {
+        let items = state.items;
 
+        if (success) {
+          console.debug('Successfully updated item');
+          items = await api.getItems();
+        } else {
+          console.debug('Failed');
         }
+
+        setState(state => ({ ...state, items, loading: false }));
       })
-      .catch(() => {
-        setState(oldState => ({ ...oldState, loading: false }));
-      });
+      .catch(error => {
+        console.error(error);
+        setState(state => ({ ...state, loading: false }));
+      });;
   };
 
   return { ...state, add, remove, update };
