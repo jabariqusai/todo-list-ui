@@ -1,16 +1,20 @@
 import classes from './form.module.sass';
 
-import { CaretRight, Spinner } from 'phosphor-react';
+import { CaretRight } from 'phosphor-react';
 import { Todo } from '../../../types/todo';
 
 interface IProps {
   onSubmit: (item: Todo.IItem) => void;
-  submitting: boolean;
+  loading: boolean;
 }
 
 const Form = (props: IProps) => {
   const submit: React.FormEventHandler<HTMLFormElement> = event => {
     event.preventDefault();
+
+    if (props.loading) {
+      return;
+    }
 
     const form = event.target as HTMLFormElement;
     const description = form.description as HTMLInputElement;
@@ -32,12 +36,8 @@ const Form = (props: IProps) => {
         autoComplete="off"
         required
       />
-      <button type="submit" disabled={props.submitting}>
-        {
-          props.submitting
-            ? <Spinner />
-            : <CaretRight weight="bold" />
-        }
+      <button type="submit" disabled={props.loading}>
+        <CaretRight weight="bold" />
       </button>
     </form>
   );

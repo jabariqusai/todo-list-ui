@@ -4,23 +4,25 @@ import { Todo } from '../types/todo';
 interface IState {
   items: Todo.IItem[];
   loading: boolean;
-  submitting: boolean;
 }
 
 const useList = () => {
-  const [state, setState] = useState<IState>({ items: [], loading: false, submitting: false });
+  const [state, setState] = useState<IState>({ items: [], loading: false });
 
-  const retrieveList = () => {
-    setState(oldState => ({ ...oldState, loading: true }));
-    fetch('http://localhost:3001/', { method: 'GET' })
-      .then(res => res.json() as Promise<Todo.IItem[]>)
-      .then(items => setState(oldState => ({ ...oldState, items })))
-      .catch(err => { alert("Something went wrong!"); })
-      .finally(() => setState(oldState => ({ ...oldState, loading: false })));
+  const getItems = () => {
+    return fetch('http://localhost:3001/', { method: 'GET' })
+      .then(res => res.json() as Promise<Todo.IItem[]>);
   };
 
   useEffect(() => {
-    retrieveList();
+    setState(state => ({ ...state, loading: true }));
+
+    getItems()
+      .then((items) => setState(state => ({ ...state, items, loading: false })))
+      .catch(error => {
+        console.error(error);
+        setState(state => ({ ...state, loading: false }));
+      });;
   }, []);
 
   const add = (item: Todo.IItem) => {
@@ -29,17 +31,27 @@ const useList = () => {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(item)
     };
-    setState({ ...state, submitting: true });
+
+    setState({ ...state, loading: true });
 
     fetch(`http://localhost:3001/`, options)
-      .then(res => {
+      .then(async res => {
+        let items: Todo.IItem[] = state.items;
+
         if (res.status === 201) {
           console.debug('Successfully added item');
-          return retrieveList();
+
+          items = await getItems();
         } else {
           console.debug('Failed', res.status);
         }
-      }).finally(() => setState(oldState => ({ ...oldState, submitting: false })));
+
+        setState(state => ({ ...state, items, loading: false }));
+      })
+      .catch(error => {
+        console.error(error);
+        setState(state => ({ ...state, loading: false }));
+      });
   };
 
   const update = (item: Todo.IItem) => {
@@ -48,38 +60,48 @@ const useList = () => {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(item)
     };
-    setState({ ...state, submitting: true });
+
+    setState({ ...state, loading: true });
 
     fetch(`http://localhost:3001/${item.id}`, options)
-      .then(res => {
+      .then(async res => {
+        let items = state.items;
+
         if (res.status === 200) {
           console.debug('Successfully updated item');
-          return retrieveList();
+          items = await getItems();
         } else {
           console.debug('Failed', res.status);
-          throw new Error('Failed');
         }
+
+        setState(state => ({ ...state, items, loading: false }));
       })
-      .catch(() => setState({ ...state, submitting: true }));
+      .catch(error => {
+        console.error(error);
+        setState(state => ({ ...state, loading: false }));
+      });;
   };
 
   const remove = (id: string) => {
     setState({ ...state, loading: true });
 
     fetch(`http://localhost:3001/${id}`, { method: 'DELETE' })
-      .then(res => {
+      .then(async res => {
+        let items = state.items;
+
         if (res.status === 200) {
           console.debug('Successfully updated item');
-          return retrieveList();
+          items = await getItems();
         } else {
           console.debug('Failed', res.status);
-          throw new Error('Failed');
-
         }
+
+        setState(state => ({ ...state, items, loading: false }));
       })
-      .catch(() => {
-        setState(oldState => ({ ...oldState, loading: false }));
-      });
+      .catch(error => {
+        console.error(error);
+        setState(state => ({ ...state, loading: false }));
+      });;
   };
 
   return { ...state, add, remove, update };
