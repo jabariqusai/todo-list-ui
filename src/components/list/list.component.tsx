@@ -30,6 +30,8 @@ const List = (props: IProps) => {
             ))
         }
         {/* {list.items.length === 0 && <span style={{ color: 'white' }}>list empty</span>} */}
+
+        {list.items.length === 0 && <span style={{ color: 'white' }}>list empty</span>}
       </ul>
 
     </div>

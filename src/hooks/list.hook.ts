@@ -5,13 +5,11 @@ import { Todo } from '../types/todo';
 interface IState {
   items: Todo.IItem[];
   loading: boolean;
-  loading: boolean;
 }
 
 const api = new ToDoService();
 
 const useList = () => {
-  const [state, setState] = useState<IState>({ items: [], loading: true });
   const [state, setState] = useState<IState>({ items: [], loading: true });
 
   const retrieveItems = () => {
