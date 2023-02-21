@@ -11,8 +11,6 @@ interface IProps { }
 const List = (props: IProps) => {
 
   const list =  useList();
-
-  console.log('list', list.loading);
   return (
     <div className={classes.wrapper}>
       <Form onSubmit={list.add} />
@@ -24,6 +22,7 @@ const List = (props: IProps) => {
             item={item}
             remove={list.remove}
             update={list.update}
+           
           />
         ))}
       </ul>)}

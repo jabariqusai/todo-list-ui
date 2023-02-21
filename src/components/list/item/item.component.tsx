@@ -1,7 +1,7 @@
 import classes from './item.module.sass';
 
 import { Todo } from '../../../types/todo';
-import { Pencil, Trash } from 'phosphor-react';
+import { Pencil, PhoneX, Trash } from 'phosphor-react';
 
 interface IProps {
   item: Todo.IItem;
@@ -22,11 +22,12 @@ const Item = (props: IProps) => {
 
   return (
     <li className={classes.item}>
+    
       <input
         type="checkbox"
         checked={status === Todo.Status.DONE}
         onChange={e => props.update({ ...props.item, status: e.target.checked ? Todo.Status.DONE : Todo.Status.PENDING })}
-      />
+        />
       <span data-status={status}>{props.item.description}</span>
       <div className={classes.actions}>
         <button

@@ -1,6 +1,6 @@
 import classes from './form.module.sass';
 
-import { CaretRight } from 'phosphor-react';
+import { CaretRight, X } from 'phosphor-react';
 import { Todo } from '../../../types/todo';
 
 interface IProps {
@@ -31,7 +31,7 @@ const Form = (props: IProps) => {
         autoComplete="off"
         required
       />
-      <button type="submit"><CaretRight weight="bold" /></button>
+      <button type="submit"><CaretRight weight="bold" /> </button>
     </form>
   );
 };
