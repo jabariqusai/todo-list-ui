@@ -14,7 +14,6 @@ const List = (props: IProps) => {
       {list.loading
         ? <>
           <h1 style={{ color: 'white' }}>Loading...</h1>
-          <Form onSubmit={list.add} />
           <div className="loader">Loading...</div>
         </>
         : <>

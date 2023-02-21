@@ -1,14 +1,11 @@
 import classes from './form.module.sass';
-import { useList } from '../../../hooks';
 import { CaretRight } from 'phosphor-react';
 import { Todo } from '../../../types/todo';
-
 interface IProps {
   onSubmit: (item: Todo.IItem) => void;
 }
 
 const Form = (props: IProps) => {
-  const list = useList();
   const submit: React.FormEventHandler<HTMLFormElement> = event => {
     event.preventDefault();
 
@@ -32,7 +29,7 @@ const Form = (props: IProps) => {
         autoComplete="off"
         required
       />
-      <button type="submit" disabled={list.loading} ><CaretRight weight="bold" /></button>
+      <button type="submit" ><CaretRight weight="bold" /></button>
     </form>
   );
 };
