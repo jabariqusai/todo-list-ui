@@ -1,8 +1,8 @@
 import classes from './list.module.sass';
-
 import Form from './form/form.component';
 import { useList } from '../../hooks';
 import Item from './item/item.component';
+import { CircleNotch } from 'phosphor-react';
 
 interface IProps { }
 
@@ -12,9 +12,9 @@ const List = (props: IProps) => {
   return (
     <div className={classes.wrapper}>
       <Form onSubmit={list.add} submitting={list.submitting} />
-      {list.loading
-        ? <span style={{ color: "pink" }}> Loading ...</span>
-        : <ul>
+      <div className={classes.listWrapper}>
+        {list.loading && <div className={classes.backdrop}><CircleNotch size={46} /></div>}
+        <ul>
           {list.items.map(item => (
             <Item
               key={item.id}
@@ -24,9 +24,9 @@ const List = (props: IProps) => {
             />
           ))}
         </ul>
-      }
+      </div>
     </div>
   );
 };
 
-export default List;
+export default List;;

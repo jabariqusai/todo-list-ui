@@ -5,3 +5,23 @@
   & > ul
     list-style: none
     padding: 0
+  & > .listWrapper
+    position: relative
+    & > ul
+      list-style: none
+      padding: 0
+    & > .backdrop
+      color: white
+      display: flex
+      justify-content: center
+      align-items: center
+      background-color: #dfdfdf94
+      min-height: 300px
+      position: absolute
+      left: 0
+      right: 0
+      top: 0
+      bottom: 0
+      cursor: progress
+      & > svg
+        animation: spinner .6s linear infinite
