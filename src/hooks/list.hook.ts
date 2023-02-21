@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import TodoApi from '../services/todo.service';
 import { Todo } from '../types/todo';
 
 interface IState {
@@ -8,93 +9,87 @@ interface IState {
 }
 
 const useList = () => {
+  const api = new TodoApi();
   const [state, setState] = useState<IState>({ items: [], loading: true, submitting: false });
 
-  const fetchList = () => {
-    console.log('fetching');
-    setState(oldState => ({ ...oldState, loading: true }));
-    fetch('http://localhost:3001/todo', { method: 'GET' })
-      .then(res => res.json() as Promise<Todo.IItem[]>)
-      .then(list => setState((oldState) => ({ ...oldState, items: list })))
-      .then(() => console.log('done!'))
-      .catch(() => console.log('something went wrong'))
-      .finally(() => setState((oldState) => ({ ...oldState, loading: false })));
-  };
-
   useEffect(() => {
-    fetchList();
+    setState(oldState => ({ ...oldState, loading: true }));
+    api.getList()
+      .then(items => setState(oldState => ({ ...oldState, loading: false, items })))
+      .catch(err => {
+        console.error(err);
+        setState(oldState => ({ ...oldState, loading: false }));
+      });
   }, []);
 
   const add = (item: Todo.IItem) => {
-    setState({ ...state, submitting: true });
-    const options = {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(item)
-    };
-
-    fetch('http://localhost:3001/todo', options)
-      .then(res => {
-        if (res.status === 201) {
+    setState({ ...state, loading: true });
+    let items = state.items;
+    api.add(item)
+      .then(async success => {
+        if (success) {
           console.log(`successfully added '${item.description}'`);
-          setState({ ...state, submitting: false });
-          fetchList();
+          items = await api.getList();
         } else {
-          console.error(`Something went wrong\n${res.status}`);
-          setState({ ...state, submitting: false });
+          console.error(`Something went wrong\n`);
         }
-      });
+      })
+      .finally(() => setState((oldState) => ({ ...oldState, loading: false, items })));
 
   };
 
   const update = (updatedItem: Todo.IItem) => {
     setState({ ...state, loading: true });
-    const options = {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(updatedItem)
-    };
+    let items = state.items;
 
-    fetch(`http://localhost:3001/todo/${updatedItem.id}`, options)
-      .then(res => {
-        if (res.status === 204) {
-          console.log(`successfully updated '${updatedItem.description}'`);
-          fetchList();
+    api.update(updatedItem)
+      .then(async success => {
+        if (success) {
+          console.log(`successfully updated`);
+          items = await api.getList();
+        } else {
+          console.error(`Something went wrong\n`);
         }
-        else
-          console.error(`Something went wrong\n${res.status}`);
-        setState({ ...state, loading: false });
-      });
+      })
+      .finally(() => setState((oldState) => ({ ...oldState, loading: false, items })));
   };
 
   const remove = (id: string) => {
     const confirmed = window.confirm('Are you sure you want to delete this item?');
     if (!confirmed) return;
-    fetch(`http://localhost:3001/todo/${id}`, { method: 'DELETE' })
-      .then(res => {
-        if (res.status === 204) {
+
+    setState((oldState) => ({ ...oldState, loading: true, items }));
+    let items = state.items;
+    api.remove(id)
+      .then(async success => {
+        if (success) {
+          items = await api.getList();
           console.log(`successfully deleted`);
-          fetchList();
         }
         else {
           setState({ ...state, loading: false });
-          console.error(`Something went wrong\n${res.status}`);
+          console.error(`Something went wrong\n`);
         }
-      });
+      })
+      .finally(() => setState((oldState) => ({ ...oldState, loading: false, items })));
   };
 
   const clearList = () => {
     const confirmed = window.confirm('Are you sure you want to delete ALL ITEMS?');
     if (!confirmed) return;
-    fetch(`http://localhost:3001/todo`, { method: 'DELETE' })
-      .then(res => {
-        if (res.status === 204) {
+    setState((oldState) => ({ ...oldState, loading: true, items }));
+    let items = state.items;
+
+    api.clearList()
+      .then(async success => {
+        if (success) {
           console.log(`successfully deleted`);
-          fetchList();
+          items = await api.getList();
         }
         else
-          console.error(`Something went wrong\n${res.status}`);
-      });
+          console.error(`Something went wrong\n`);
+      })
+      .finally(() => setState((oldState) => ({ ...oldState, loading: false, items })));;
   };
 
   return { ...state, add, remove, update, clearList };
