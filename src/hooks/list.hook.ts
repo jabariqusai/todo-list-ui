@@ -11,10 +11,18 @@ const api = new ToDoService();
 
 const useList = () => {
 
-  api.fetchItems();
-
   const [state, setState] = useState<IState>({ items: [], loading: false });
 
+  const getItems = () => {
+    api.fetchItems()
+    .then(items => setState(state => ({ ...state, items, loading: false })))
+    .catch(err => {
+      console.error(err);
+
+      alert("something wrong");
+      setState(state => ({ ...state, loading: false }));
+    });
+  };
   useEffect(() => {
 
     setState((state) => ({ ...state, loading: true }));
@@ -22,8 +30,10 @@ const useList = () => {
     api.fetchItems()
       .then(items => setState(state => ({ ...state, items, loading: false })))
       .catch(err => {
+        console.error(err);
+
         alert("something wrong");
-        setState(oldState => ({ ...oldState, loading: false }));
+        setState(state => ({ ...state, loading: false }));
       });
 
   }, []);
@@ -33,46 +43,51 @@ const useList = () => {
     // options with RequestInit will show the request body which will be send in the fetch function 
 
     setState({ ...state, loading: true });
-    
-   api.add(item)
+
+    api.add(item)
       .then(success => {
         if (success) {
           console.log("successfully added items ");
-          return api.fetchItems();
+          return getItems();
         } else {
           console.log("failed added items");
 
         }
       });
+    setState({ ...state, loading: false });
 
   };
 
 
-  const remove = (id: string) =>
-
+  const remove = (id: string) => {
+    setState({ ...state, loading: true });
     api.remove(id)
       .then(success => {
         if (success) {
           console.log("deleted successfully");
-          return api.fetchItems();
+          return getItems();
         } else {
           console.log('failed to delete items ');
         }
       });
+    setState({ ...state, loading: false });
+
+  };
 
 
   const update = (updatedItem: Todo.IItem) => {
-
+    setState({ ...state, loading: true });
     api.update(updatedItem)
       .then(success => {
         if (success) {
           console.log("updated successfully");
-          return api.fetchItems();
+          return getItems();
         } else {
           console.log('failed updated');
-          return api.fetchItems();
+          return getItems();
         }
       });
+    setState({ ...state, loading: false });
 
   };
 

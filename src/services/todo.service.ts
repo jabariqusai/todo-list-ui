@@ -23,7 +23,7 @@ class ToDoService {
       body: JSON.stringify(item)
     };
 
-    return fetch('http://localhost:3001/', options)
+    return fetch(`${this.API}/`, options)
       .then((res) => res.status === 201);
   };
   update = (updatedItem: Todo.IItem) => {
