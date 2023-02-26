@@ -1,7 +1,6 @@
 import React from 'react';
 import classes from './app.module.sass';
-
-import { List } from './components';
+import List from './components/list/list.component';
 
 const App = () => {
   return (

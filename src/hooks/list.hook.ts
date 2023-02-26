@@ -1,21 +1,22 @@
 import { useEffect, useState } from 'react';
-import TodoApi from '../components/services/todo.service';
 import { Todo } from '../types/todo';
-
 interface IState {
   items: Todo.IItem[];
   loading: boolean;
 }
 
-const api = new TodoApi();
-
 const useList = () => {
   const [state, setState] = useState<IState>({ items: [], loading: false });
+
+  const getItems = () => {
+    return fetch('http://localhost:3003/', { method: 'GET' })
+      .then(res => res.json() as Promise<Todo.IItem[]>);
+  };
 
   useEffect(() => {
     setState(state => ({ ...state, loading: true }));
 
-    api.getItems()
+    getItems()
       .then((items) => setState(state => ({ ...state, items, loading: false })))
       .catch(error => {
         console.error(error);
@@ -24,18 +25,24 @@ const useList = () => {
   }, []);
 
   const add = (item: Todo.IItem) => {
+    const options: RequestInit = {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(item)
+    };
+
     setState({ ...state, loading: true });
 
-    api.add(item)
-      .then(async success => {
+    fetch(`http://localhost:3003/`, options)
+      .then(async res => {
         let items: Todo.IItem[] = state.items;
 
-        if (success) {
+        if (res.status === 201) {
           console.debug('Successfully added item');
 
-          items = await api.getItems();
+          items = await getItems();
         } else {
-          console.debug('Failed');
+          console.debug('Failed', res.status);
         }
 
         setState(state => ({ ...state, items, loading: false }));
@@ -47,17 +54,23 @@ const useList = () => {
   };
 
   const update = (item: Todo.IItem) => {
+    const options: RequestInit = {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(item)
+    };
+
     setState({ ...state, loading: true });
 
-    api.update(item)
-      .then(async success => {
+    fetch(`http://localhost:3003/${item.id}`, options)
+      .then(async res => {
         let items = state.items;
 
-        if (success) {
+        if (res.status === 200) {
           console.debug('Successfully updated item');
-          items = await api.getItems();
+          items = await getItems();
         } else {
-          console.debug('Failed');
+          console.debug('Failed', res.status);
         }
 
         setState(state => ({ ...state, items, loading: false }));
@@ -71,15 +84,15 @@ const useList = () => {
   const remove = (id: string) => {
     setState({ ...state, loading: true });
 
-    api.remove(id)
-      .then(async success => {
+    fetch(`http://localhost:3003/${id}`, { method: 'DELETE' })
+      .then(async res => {
         let items = state.items;
 
-        if (success) {
+        if (res.status === 200) {
           console.debug('Successfully updated item');
-          items = await api.getItems();
+          items = await getItems();
         } else {
-          console.debug('Failed');
+          console.debug('Failed', res.status);
         }
 
         setState(state => ({ ...state, items, loading: false }));
@@ -92,5 +105,4 @@ const useList = () => {
 
   return { ...state, add, remove, update };
 };
-
 export default useList;
